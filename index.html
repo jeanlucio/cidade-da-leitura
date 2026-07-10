@@ -1,0 +1,1021 @@
+<title>Cidade da Leitura</title>
+<style>
+  :root {
+    --sky-top: #bfe3f0;
+    --sky-bottom: #eaf6ee;
+    --ground: #cfe8c9;
+    --ground-line: #b6d9ae;
+    --card: #ffffff;
+    --card-line: #dde8e0;
+    --ink: #2d3b34;
+    --ink-soft: #62766c;
+    --accent: #2f7d6e;
+    --accent-ink: #ffffff;
+    --accent-2: #4a97a8;
+    --wall: #f5ede0;
+    --wall-2: #ecdcc3;
+    --prompt-glow: #f2c85b;
+    --accent-soft: #e2eeea;
+    --ink-faint: #9aa39c;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    height: 100%;
+    margin: 0;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-bottom) 62%);
+    color: var(--ink);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.9rem 1.1rem 0;
+  }
+
+  .brand {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--ink-soft);
+    letter-spacing: 0.02em;
+  }
+
+  .gear {
+    width: 2.2rem;
+    height: 2.2rem;
+    border-radius: 50%;
+    border: 1px solid var(--card-line);
+    background: var(--card);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.05rem;
+    cursor: pointer;
+    color: var(--ink-soft);
+  }
+  .gear:hover { color: var(--ink); }
+  .gear:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .icon-group {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem 1.2rem;
+    gap: 1.1rem;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 0.5rem;
+    background: rgba(255,255,255,0.55);
+    padding: 0.3rem;
+    border-radius: 999px;
+    border: 1px solid var(--card-line);
+  }
+
+  .tab {
+    border: none;
+    background: transparent;
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--ink-soft);
+    cursor: pointer;
+  }
+
+  .tab.active {
+    background: var(--accent);
+    color: var(--accent-ink);
+  }
+  .tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--card-line);
+    border-radius: 28px;
+    box-shadow: 0 10px 30px -14px rgba(45, 59, 52, 0.25);
+    padding: 2rem 2.4rem 2.4rem;
+    width: min(92vw, 440px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.3rem;
+  }
+
+  .instruction {
+    font-size: 0.95rem;
+    color: var(--ink-soft);
+    text-align: center;
+    margin: 0;
+  }
+
+  .prompt-row {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    min-height: 7.2rem;
+  }
+
+  .prompt {
+    font-size: 6.2rem;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--ink);
+    text-transform: uppercase;
+    user-select: none;
+  }
+
+  .prompt-photo {
+    display: none;
+    width: 108px;
+    height: 108px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid var(--accent-2);
+    background: var(--accent-soft);
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .prompt-photo.active { display: flex; }
+  .prompt-photo img { width: 100%; height: 100%; object-fit: cover; }
+  .prompt-photo .placeholder { font-size: 2.6rem; opacity: 0.55; }
+
+  .hear-btn {
+    width: 3.1rem;
+    height: 3.1rem;
+    border-radius: 50%;
+    border: none;
+    background: var(--accent-2);
+    color: var(--accent-ink);
+    font-size: 1.3rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .hear-btn:active { transform: scale(0.94); }
+  .hear-btn:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+
+  .choices {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.8rem;
+    width: 100%;
+  }
+
+  .choices.word-mode {
+    grid-template-columns: 1fr;
+  }
+
+  .choice {
+    aspect-ratio: 1;
+    border-radius: 18px;
+    border: 2px solid var(--card-line);
+    background: #fbfaf7;
+    font-size: 2.3rem;
+    font-weight: 700;
+    color: var(--ink);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-transform: uppercase;
+    transition: transform 0.12s ease, border-color 0.2s ease, background 0.2s ease;
+  }
+
+  .choice.word-mode {
+    aspect-ratio: auto;
+    padding: 0.9rem 1rem;
+    font-size: 1.35rem;
+    text-transform: none;
+  }
+
+  .choice:active { transform: scale(0.95); }
+  .choice:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+  .choice.prompted {
+    animation: glow 1s ease-in-out infinite;
+    border-color: var(--prompt-glow);
+  }
+
+  @keyframes glow {
+    0%, 100% { background: #fbfaf7; }
+    50% { background: color-mix(in srgb, var(--prompt-glow) 35%, #fbfaf7); }
+  }
+
+  .choice.correct-flash {
+    background: color-mix(in srgb, var(--accent) 22%, #fbfaf7);
+    border-color: var(--accent);
+  }
+
+  .progress {
+    display: flex;
+    gap: 0.4rem;
+  }
+
+  .progress .dot {
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 50%;
+    background: var(--card-line);
+  }
+
+  .progress .dot.done { background: var(--accent); }
+
+  .village-counter {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--ink-soft);
+    background: rgba(255,255,255,0.6);
+    padding: 0.3rem 0.8rem;
+    border-radius: 999px;
+    border: 1px solid var(--card-line);
+  }
+
+  .skyline-wrap {
+    width: 100%;
+    max-width: 92vw;
+    height: 152px;
+    position: relative;
+    flex-shrink: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  .ground {
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 40px;
+    background: var(--ground);
+    border-top: 3px solid var(--ground-line);
+    min-width: 100%;
+  }
+
+  .skyline {
+    position: absolute;
+    bottom: 40px;
+    left: 0;
+    min-width: 100%;
+    height: 112px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 0 1rem;
+    width: max-content;
+  }
+
+  .house {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation: pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+  }
+
+  .house.assisted { opacity: 0.72; }
+
+  @keyframes pop {
+    from { transform: translateY(18px) scale(0.6); opacity: 0; }
+    to { transform: translateY(0) scale(1); opacity: 1; }
+  }
+
+  .chimney {
+    position: absolute;
+    top: -8px;
+    right: 10px;
+    width: 7px;
+    height: 14px;
+    border-radius: 1px 1px 0 0;
+    z-index: 1;
+  }
+
+  .roof {
+    width: 0;
+    height: 0;
+    border-left: 23px solid transparent;
+    border-right: 23px solid transparent;
+    border-bottom: 19px solid;
+  }
+
+  .wall {
+    width: 46px;
+    height: 38px;
+    border: 1px solid;
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 4px;
+    padding-bottom: 4px;
+  }
+
+  .arch-window {
+    width: 9px;
+    height: 9px;
+    border-radius: 50% 50% 3px 3px;
+    opacity: 0.9;
+  }
+
+  .door {
+    width: 11px;
+    height: 16px;
+    border-radius: 50% 50% 2px 2px;
+    opacity: 0.9;
+  }
+
+  .porch {
+    width: 50px;
+    height: 5px;
+    border-top: 2px dashed;
+    margin-top: -3px;
+    opacity: 0.7;
+  }
+
+  .buddy {
+    position: absolute;
+    bottom: 40px;
+    font-size: 1.5rem;
+    transition: left 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), bottom 0.4s ease;
+    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.15));
+  }
+
+  .buddy.hop { animation: hop 0.5s ease; }
+
+  @keyframes hop {
+    0% { transform: translateY(0); }
+    40% { transform: translateY(-22px); }
+    100% { transform: translateY(0); }
+  }
+
+  .celebrate {
+    text-align: center;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+  .celebrate.show { display: flex; }
+  .celebrate p { color: var(--ink-soft); margin: 0; max-width: 30ch; }
+
+  .again-btn {
+    border: none;
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-size: 1.05rem;
+    font-weight: 700;
+    padding: 0.85rem 1.8rem;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+  .again-btn:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+
+  dialog {
+    border: none;
+    border-radius: 16px;
+    padding: 0;
+    max-width: min(90vw, 460px);
+    box-shadow: 0 20px 50px -20px rgba(0,0,0,0.4);
+  }
+  dialog::backdrop { background: rgba(20, 28, 24, 0.45); }
+  .dialog-inner { padding: 1.4rem 1.5rem; }
+  .dialog-inner h2 { font-size: 1.05rem; margin: 0 0 0.6rem; }
+  .dialog-inner p { font-size: 0.88rem; color: var(--ink-soft); line-height: 1.55; }
+  .dialog-inner code {
+    display: block;
+    background: #f3f1ec;
+    padding: 0.6rem 0.7rem;
+    border-radius: 8px;
+    font-size: 0.76rem;
+    white-space: pre-wrap;
+    margin: 0.6rem 0;
+    max-height: 220px;
+    overflow-y: auto;
+  }
+  .app-name-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    margin: 0.2rem 0 1rem;
+  }
+  .app-name-field label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .app-name-field input {
+    border: 1px solid var(--card-line);
+    border-radius: 8px;
+    padding: 0.5rem 0.7rem;
+    font-size: 0.9rem;
+    font-family: inherit;
+  }
+
+  .family-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    margin: 0.7rem 0;
+  }
+  .person-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .person-row .thumb-btn {
+    border: none;
+    background: none;
+    padding: 0;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .person-row .thumb {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #eef1ec;
+    border: 2px dashed var(--card-line);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    font-size: 1.1rem;
+    color: var(--ink-faint);
+  }
+  .person-row .thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .person-row .thumb.has-photo { border-style: solid; border-color: var(--accent); }
+  .person-row input[type="file"] { display: none; }
+  .person-row .name-input {
+    flex: 1;
+    min-width: 0;
+    border: 1px solid var(--card-line);
+    border-radius: 8px;
+    padding: 0.45rem 0.6rem;
+    font-size: 0.84rem;
+    font-family: inherit;
+  }
+
+  .dialog-inner .row { display: flex; gap: 0.6rem; margin-top: 0.6rem; }
+  .dialog-inner button.close, .dialog-inner button.reset {
+    border: none;
+    padding: 0.55rem 1.1rem;
+    border-radius: 999px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .dialog-inner button.close { background: var(--accent); color: #fff; }
+  .dialog-inner button.reset { background: #f6e9e5; color: #a14f3e; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .house, .buddy.hop, .choice.prompted { animation: none; }
+  }
+</style>
+
+<div class="topbar">
+  <span class="brand" id="brandLabel">cidade da leitura</span>
+  <div class="icon-group">
+    <button class="gear" id="soundBtn" aria-label="Som de comemoração ligado — toque para desligar">🔊</button>
+    <button class="gear" id="infoBtn" aria-label="Como editar este cartão">⚙️</button>
+  </div>
+</div>
+
+<main>
+  <div class="tabs" role="tablist" aria-label="Escolher atividade">
+    <button class="tab active" id="tabFonemas" role="tab" aria-selected="true">🔤 Sons das letras</button>
+    <button class="tab" id="tabNomes" role="tab" aria-selected="false">👪 Nomes da família</button>
+  </div>
+
+  <div class="card" id="trialCard">
+    <p class="instruction" id="instruction">Toque no som que você ouviu</p>
+    <div class="prompt-row">
+      <div class="prompt-photo" id="promptPhoto">
+        <span class="placeholder" id="promptPhotoPlaceholder">👤</span>
+        <img id="promptPhotoImg" alt="" hidden>
+      </div>
+      <div class="prompt" id="promptLetter">M</div>
+      <button class="hear-btn" id="hearBtn" aria-label="Ouvir de novo">🔊</button>
+    </div>
+    <div class="choices" id="choices"></div>
+    <div class="progress" id="progress"></div>
+  </div>
+
+  <div class="card celebrate" id="celebrateCard">
+    <p style="font-size:2.4rem;margin:0">🏙️✨</p>
+    <p id="celebrateText">A cidade cresceu! Todas as casas foram construídas.</p>
+    <button class="again-btn" id="againBtn">🔁 Jogar de novo</button>
+  </div>
+
+  <span class="village-counter" id="villageCounter">🏙️ 0 casas construídas ao todo</span>
+
+  <div class="skyline-wrap" aria-hidden="true">
+    <div class="skyline" id="skyline"></div>
+    <div class="ground"></div>
+    <div class="buddy" id="buddy" style="left: 8px;">🧍</div>
+  </div>
+</main>
+
+<dialog id="infoDialog">
+  <div class="dialog-inner">
+    <h2>Configurações</h2>
+    <div class="app-name-field">
+      <label for="appNameInput">Nome do app (só aparece neste aparelho)</label>
+      <input type="text" id="appNameInput" placeholder="Cidade da Leitura">
+    </div>
+    <p>
+      <strong>Família</strong> — dê o nome de cada pessoa e, se quiser, uma foto da galeria do
+      tablet. Tudo isso fica salvo só neste aparelho e neste navegador; nada entra no código
+      publicado no GitHub.
+    </p>
+    <div class="family-list" id="familyEditor"></div>
+    <p>
+      Aba <strong>Sons das letras</strong>: edite o array <code>FONEMA_TRIALS</code> no
+      &lt;script&gt; com a sequência real indicada pela fono/psicopedagoga (ainda é só um
+      exemplo de partida abaixo).
+    </p>
+    <code id="configPreview"></code>
+    <p>
+      A cada acerto (com ou sem ajuda), uma casinha entra na cidade e o total fica salvo
+      neste tablet — o contador cresce dia após dia, sem nunca mostrar tela de "errado".
+    </p>
+    <div class="row">
+      <button class="close" id="closeDialog">Entendi</button>
+      <button class="reset" id="resetVillage">Reiniciar cidade</button>
+    </div>
+  </div>
+</dialog>
+
+<script>
+  // EDIT HERE: replace with the real phoneme/letter sequence from the SLP/psicopedagoga.
+  // Vowel prompts use an accented "say" (Á, Ó...) so the TTS engine gives them the same
+  // stressed, full-volume articulation as consonant+vowel syllables like "Mê"/"Tê" — a bare
+  // single vowel is often spoken shorter and quieter by browser voices.
+  const FONEMA_TRIALS = [
+    { prompt: "A", say: "Á", choices: ["A", "O", "E"], correct: 0 },
+    { prompt: "M", say: "Mê", choices: ["N", "M", "S"], correct: 1 },
+    { prompt: "O", say: "Ó", choices: ["A", "U", "O"], correct: 2 },
+    { prompt: "T", say: "Tê", choices: ["T", "P", "D"], correct: 0 },
+    { prompt: "MA", say: "Má", choices: ["MA", "PA", "TA"], correct: 0 },
+  ];
+
+  // Generic placeholders only — no real names ship in the published code. Real names are
+  // typed once on-device via the settings panel and stored only in localStorage (see
+  // getFamily()/nameOverrides below), keyed by the stable "id" so a name edit never breaks
+  // an already-saved photo.
+  const FAMILY_DEFAULTS = [
+    { id: "crianca", label: "A criança", say: "A criança" },
+    { id: "pai", label: "Papai", say: "Papai" },
+    { id: "mae", label: "Mamãe", say: "Mamãe" },
+    { id: "tia", label: "Tia", say: "Tia" },
+    { id: "tio", label: "Tio", say: "Tio" },
+    { id: "prima", label: "Prima/Primo", say: "Prima" },
+    { id: "avo-pp", label: "Vovô (lado do papai)", say: "Vovô" },
+    { id: "avo-pm", label: "Vovô (lado da mamãe)", say: "Vovô" },
+    { id: "avo-ap", label: "Vovó (lado do papai)", say: "Vovó" },
+    { id: "avo-am", label: "Vovó (lado da mamãe)", say: "Vovó" },
+  ];
+
+  const PROMPT_DELAY_MS = 3500;
+  const VILLAGE_KEY = "jg-cidade-total";
+
+  // Palettes echo the real dollhouses in the photos: blue w/ arch windows,
+  // yellow cottage, mint w/ pink porch, magenta w/ orange roof, cream w/ porch.
+  const HOUSE_PALETTES = [
+    { roof: "#4a90d9", wall: "#f5ede0", trim: "#e0d2b8", accent: "#c94f3e", porch: false },
+    { roof: "#e3c04a", wall: "#fbead2", trim: "#e6c48f", accent: "#7a5230", porch: false },
+    { roof: "#4fd0bd", wall: "#ffffff", trim: "#f2b8d4", accent: "#f2b8d4", porch: true },
+    { roof: "#e8923d", wall: "#f2789f", trim: "#c9557f", accent: "#ffe27a", porch: false },
+    { roof: "#e357a0", wall: "#fdf6e3", trim: "#e6cf8f", accent: "#4a97a8", porch: true },
+  ];
+
+  const SOUND_KEY = "jg-som-comemorativo";
+  const PHOTOS_KEY = "jg-fotos";
+  const NAMES_KEY = "jg-nomes";
+  const APP_NAME_KEY = "jg-nome-app";
+  const DEFAULT_APP_NAME = "Cidade da Leitura";
+
+  let deck = "fonemas";
+  let trials = [];
+  let index = 0;
+  let promptTimer = null;
+  let villageTotal = Number(localStorage.getItem(VILLAGE_KEY) || 0);
+  let chimeOn = localStorage.getItem(SOUND_KEY) !== "0";
+  let audioCtx = null;
+  // Photos and real names never leave this device — stored only in localStorage, keyed by
+  // the stable person "id" from FAMILY_DEFAULTS, never by the (editable) display label.
+  let photos = JSON.parse(localStorage.getItem(PHOTOS_KEY) || "{}");
+  let nameOverrides = JSON.parse(localStorage.getItem(NAMES_KEY) || "{}");
+  let appNameOverride = localStorage.getItem(APP_NAME_KEY) || "";
+
+  const brandLabelEl = document.getElementById("brandLabel");
+  const promptPhotoEl = document.getElementById("promptPhoto");
+  const promptPhotoImgEl = document.getElementById("promptPhotoImg");
+  const promptPhotoPlaceholderEl = document.getElementById("promptPhotoPlaceholder");
+  const promptLetterEl = document.getElementById("promptLetter");
+  const choicesEl = document.getElementById("choices");
+  const progressEl = document.getElementById("progress");
+  const hearBtn = document.getElementById("hearBtn");
+  const skylineEl = document.getElementById("skyline");
+  const buddyEl = document.getElementById("buddy");
+  const trialCard = document.getElementById("trialCard");
+  const celebrateCard = document.getElementById("celebrateCard");
+  const celebrateText = document.getElementById("celebrateText");
+  const againBtn = document.getElementById("againBtn");
+  const instructionEl = document.getElementById("instruction");
+  const villageCounterEl = document.getElementById("villageCounter");
+  const tabFonemas = document.getElementById("tabFonemas");
+  const tabNomes = document.getElementById("tabNomes");
+  const soundBtn = document.getElementById("soundBtn");
+
+  function updateSoundBtn() {
+    soundBtn.textContent = chimeOn ? "🔊" : "🔈";
+    soundBtn.setAttribute(
+      "aria-label",
+      chimeOn ? "Som de comemoração ligado — toque para desligar" : "Som de comemoração desligado — toque para ligar"
+    );
+  }
+
+  // Short, soft ascending chime synthesized locally — no audio file needed,
+  // and easy to keep gentle (quick decay, moderate volume) for sound-sensitive ears.
+  function playChime() {
+    if (!chimeOn) {
+      return;
+    }
+    try {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === "suspended") {
+        audioCtx.resume();
+      }
+      const notes = [523.25, 659.25, 783.99]; // C5, E5, G5
+      notes.forEach((freq, i) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        const start = audioCtx.currentTime + i * 0.09;
+        osc.type = "sine";
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0, start);
+        gain.gain.linearRampToValueAtTime(0.16, start + 0.015);
+        gain.gain.exponentialRampToValueAtTime(0.001, start + 0.22);
+        osc.connect(gain).connect(audioCtx.destination);
+        osc.start(start);
+        osc.stop(start + 0.24);
+      });
+    } catch (err) {
+      // Web Audio unsupported in this environment — silently degrade.
+    }
+  }
+
+  function savePhotos() {
+    localStorage.setItem(PHOTOS_KEY, JSON.stringify(photos));
+  }
+
+  function saveNameOverrides() {
+    localStorage.setItem(NAMES_KEY, JSON.stringify(nameOverrides));
+  }
+
+  // Merges the generic public defaults with whatever real names were typed in on this device.
+  function getFamily() {
+    return FAMILY_DEFAULTS.map((person) => {
+      const custom = (nameOverrides[person.id] || "").trim();
+      return {
+        id: person.id,
+        label: custom || person.label,
+        say: custom || person.say,
+      };
+    });
+  }
+
+  function applyAppName() {
+    const name = appNameOverride.trim() || DEFAULT_APP_NAME;
+    brandLabelEl.textContent = name;
+    document.title = name;
+  }
+
+  // Downscale on-device before storing, so a full-resolution camera photo doesn't blow past
+  // localStorage's ~5-10MB quota after a handful of family members are added.
+  function resizeImageFile(file, maxSize) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const img = new Image();
+        img.onload = () => {
+          const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
+          const w = Math.round(img.width * scale);
+          const h = Math.round(img.height * scale);
+          const canvas = document.createElement("canvas");
+          canvas.width = w;
+          canvas.height = h;
+          canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL("image/jpeg", 0.82));
+        };
+        img.onerror = reject;
+        img.src = reader.result;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function updatePromptPhoto(id) {
+    promptPhotoEl.classList.add("active");
+    if (photos[id]) {
+      promptPhotoImgEl.src = photos[id];
+      promptPhotoImgEl.hidden = false;
+      promptPhotoPlaceholderEl.style.display = "none";
+    } else {
+      promptPhotoImgEl.hidden = true;
+      promptPhotoPlaceholderEl.style.display = "";
+    }
+  }
+
+  function buildFamilyEditor() {
+    const list = document.getElementById("familyEditor");
+    list.innerHTML = "";
+    FAMILY_DEFAULTS.forEach((person) => {
+      const row = document.createElement("div");
+      row.className = "person-row";
+
+      const thumbBtn = document.createElement("label");
+      thumbBtn.className = "thumb-btn";
+      const thumb = document.createElement("span");
+      thumb.className = "thumb" + (photos[person.id] ? " has-photo" : "");
+      thumb.innerHTML = photos[person.id] ? '<img src="' + photos[person.id] + '" alt="">' : "👤";
+      const fileInput = document.createElement("input");
+      fileInput.type = "file";
+      fileInput.accept = "image/*";
+      fileInput.addEventListener("change", async (event) => {
+        const file = event.target.files[0];
+        if (!file) {
+          return;
+        }
+        photos[person.id] = await resizeImageFile(file, 320);
+        savePhotos();
+        buildFamilyEditor();
+        if (deck === "nomes" && trials[index] && trials[index].correctId === person.id) {
+          updatePromptPhoto(person.id);
+        }
+      });
+      thumbBtn.appendChild(thumb);
+      thumbBtn.appendChild(fileInput);
+
+      const nameInput = document.createElement("input");
+      nameInput.type = "text";
+      nameInput.className = "name-input";
+      nameInput.placeholder = person.label;
+      nameInput.value = nameOverrides[person.id] || "";
+      nameInput.setAttribute("aria-label", "Nome para " + person.label);
+      nameInput.addEventListener("input", (event) => {
+        nameOverrides[person.id] = event.target.value;
+        saveNameOverrides();
+      });
+
+      row.appendChild(thumbBtn);
+      row.appendChild(nameInput);
+      list.appendChild(row);
+    });
+  }
+
+  function shuffled(arr) {
+    return arr.map((v) => [Math.random(), v]).sort((a, b) => a[0] - b[0]).map((v) => v[1]);
+  }
+
+  function speak(text) {
+    if (!("speechSynthesis" in window)) {
+      return;
+    }
+    try {
+      // Only cancel an utterance actually in progress — calling cancel() right before every
+      // speak() is what causes some browsers (Chrome especially) to clip/quiet the very start
+      // of the next utterance.
+      if (speechSynthesis.speaking || speechSynthesis.pending) {
+        speechSynthesis.cancel();
+      }
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.lang = "pt-BR";
+      utter.rate = 0.85;
+      utter.pitch = 1;
+      utter.volume = 1;
+      speechSynthesis.speak(utter);
+    } catch (err) {
+      // Speech synthesis unsupported in this environment — silently degrade.
+    }
+  }
+
+  function buildNomeTrials() {
+    const family = getFamily();
+    const order = shuffled(family);
+    return order.map((target) => {
+      const others = shuffled(family.filter((p) => p.id !== target.id)).slice(0, 2);
+      return {
+        prompt: "👪",
+        say: target.say,
+        choices: shuffled([target.label, others[0].label, others[1].label]),
+        correct: null, // resolved by label match at render time
+        correctLabel: target.label,
+        correctId: target.id,
+      };
+    });
+  }
+
+  function updateVillageCounter() {
+    villageCounterEl.textContent = "🏙️ " + villageTotal + (villageTotal === 1 ? " casa construída ao todo" : " casas construídas ao todo");
+  }
+
+  function renderProgress() {
+    progressEl.innerHTML = "";
+    trials.forEach((_, i) => {
+      const dot = document.createElement("span");
+      dot.className = "dot" + (i < index ? " done" : "");
+      progressEl.appendChild(dot);
+    });
+  }
+
+  function clearPromptTimer() {
+    if (promptTimer) {
+      clearTimeout(promptTimer);
+      promptTimer = null;
+    }
+  }
+
+  function renderTrial() {
+    clearPromptTimer();
+    const trial = trials[index];
+    const isWordMode = deck === "nomes";
+
+    if (isWordMode) {
+      promptLetterEl.style.display = "none";
+      updatePromptPhoto(trial.correctId);
+    } else {
+      promptLetterEl.style.display = "";
+      promptLetterEl.textContent = trial.prompt;
+      promptPhotoEl.classList.remove("active");
+    }
+    choicesEl.classList.toggle("word-mode", isWordMode);
+    choicesEl.innerHTML = "";
+
+    const order = isWordMode
+      ? trial.choices.map((label) => ({ label, isCorrect: label === trial.correctLabel }))
+      : shuffled(trial.choices.map((label, i) => ({ label, isCorrect: i === trial.correct })));
+
+    order.forEach((choice) => {
+      const btn = document.createElement("button");
+      btn.className = "choice" + (isWordMode ? " word-mode" : "");
+      btn.textContent = choice.label;
+      btn.addEventListener("click", () => handleAnswer(choice.isCorrect, btn));
+      choicesEl.appendChild(btn);
+    });
+
+    renderProgress();
+    speak(trial.say);
+
+    // Errorless learning: if no response, gently glow the correct choice — never a red "wrong".
+    promptTimer = setTimeout(() => {
+      const buttons = Array.from(choicesEl.children);
+      const correctBtn = buttons.find((b) => b.textContent === (isWordMode ? trial.correctLabel : trial.choices[trial.correct]));
+      if (correctBtn) {
+        correctBtn.classList.add("prompted");
+      }
+    }, PROMPT_DELAY_MS);
+  }
+
+  function handleAnswer(isCorrect, btn) {
+    if (!isCorrect) {
+      return;
+    }
+    clearPromptTimer();
+    const wasPrompted = btn.classList.contains("prompted");
+    btn.classList.add("correct-flash");
+    Array.from(choicesEl.children).forEach((b) => (b.style.pointerEvents = "none"));
+
+    playChime();
+    addHouse(wasPrompted);
+
+    setTimeout(() => {
+      index += 1;
+      if (index >= trials.length) {
+        showCelebration();
+      } else {
+        renderTrial();
+      }
+    }, 650);
+  }
+
+  function addHouse(assisted) {
+    const palette = HOUSE_PALETTES[skylineEl.children.length % HOUSE_PALETTES.length];
+    const house = document.createElement("div");
+    house.className = "house" + (assisted ? " assisted" : "");
+    house.innerHTML =
+      '<div class="chimney" style="background:' + palette.roof + '"></div>' +
+      '<div class="roof" style="border-bottom-color:' + palette.roof + '"></div>' +
+      '<div class="wall" style="background:' + palette.wall + ';border-color:' + palette.trim + '">' +
+      '<span class="arch-window" style="background:' + palette.accent + '"></span>' +
+      '<span class="door" style="background:' + palette.accent + '"></span>' +
+      "</div>" +
+      (palette.porch ? '<div class="porch" style="border-color:' + palette.trim + '"></div>' : "");
+    skylineEl.appendChild(house);
+    skylineEl.parentElement.scrollLeft = skylineEl.scrollWidth;
+
+    const houses = skylineEl.children.length;
+    const targetLeft = Math.min(16 + houses * 60, skylineEl.scrollWidth - 26);
+    buddyEl.style.left = targetLeft + "px";
+    buddyEl.classList.remove("hop");
+    void buddyEl.offsetWidth;
+    buddyEl.classList.add("hop");
+
+    villageTotal += 1;
+    localStorage.setItem(VILLAGE_KEY, String(villageTotal));
+    updateVillageCounter();
+  }
+
+  function showCelebration() {
+    trialCard.style.display = "none";
+    celebrateCard.classList.add("show");
+    celebrateText.textContent = deck === "nomes"
+      ? "Todo mundo da família apareceu! A cidade cresceu."
+      : "A cidade cresceu! Todas as casas foram construídas.";
+    instructionEl.textContent = "";
+  }
+
+  function startDeck(which) {
+    deck = which;
+    trials = which === "fonemas" ? FONEMA_TRIALS : buildNomeTrials();
+    index = 0;
+    trialCard.style.display = "flex";
+    celebrateCard.classList.remove("show");
+    instructionEl.textContent = which === "fonemas" ? "Toque no som que você ouviu" : "Toque no nome que você ouviu";
+    tabFonemas.classList.toggle("active", which === "fonemas");
+    tabFonemas.setAttribute("aria-selected", String(which === "fonemas"));
+    tabNomes.classList.toggle("active", which === "nomes");
+    tabNomes.setAttribute("aria-selected", String(which === "nomes"));
+    renderTrial();
+  }
+
+  function restart() {
+    startDeck(deck);
+  }
+
+  hearBtn.addEventListener("click", () => speak(trials[index].say));
+  againBtn.addEventListener("click", restart);
+  tabFonemas.addEventListener("click", () => startDeck("fonemas"));
+  tabNomes.addEventListener("click", () => startDeck("nomes"));
+
+  const infoDialog = document.getElementById("infoDialog");
+  const appNameInput = document.getElementById("appNameInput");
+  document.getElementById("infoBtn").addEventListener("click", () => {
+    document.getElementById("configPreview").textContent = JSON.stringify(FONEMA_TRIALS, null, 2);
+    appNameInput.value = appNameOverride;
+    buildFamilyEditor();
+    infoDialog.showModal();
+  });
+  appNameInput.addEventListener("input", (event) => {
+    appNameOverride = event.target.value;
+    localStorage.setItem(APP_NAME_KEY, appNameOverride);
+    applyAppName();
+  });
+  document.getElementById("closeDialog").addEventListener("click", () => infoDialog.close());
+  document.getElementById("resetVillage").addEventListener("click", () => {
+    villageTotal = 0;
+    localStorage.setItem(VILLAGE_KEY, "0");
+    updateVillageCounter();
+    infoDialog.close();
+  });
+
+  soundBtn.addEventListener("click", () => {
+    chimeOn = !chimeOn;
+    localStorage.setItem(SOUND_KEY, chimeOn ? "1" : "0");
+    updateSoundBtn();
+    if (chimeOn) {
+      playChime();
+    }
+  });
+
+  applyAppName();
+  updateSoundBtn();
+  updateVillageCounter();
+  startDeck("fonemas");
+</script>
