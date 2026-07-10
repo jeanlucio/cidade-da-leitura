@@ -128,6 +128,24 @@
   }
   .tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
+  .reward-tabs {
+    background: transparent;
+    border: none;
+    padding: 0;
+    gap: 0.4rem;
+  }
+  .reward-tabs .tab {
+    background: rgba(255,255,255,0.55);
+    border: 1px solid var(--card-line);
+    padding: 0.35rem 0.8rem;
+    font-size: 0.76rem;
+  }
+  .reward-tabs .tab.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-ink);
+  }
+
   .card {
     background: var(--card);
     border: 1px solid var(--card-line);
@@ -263,6 +281,13 @@
 
   .progress .dot.done { background: var(--accent); }
 
+  .counters-row {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
   .village-counter {
     font-size: 0.82rem;
     font-weight: 700;
@@ -312,15 +337,21 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    animation: pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     position: relative;
   }
-
-  .house.assisted { opacity: 0.72; }
 
   @keyframes pop {
     from { transform: translateY(18px) scale(0.6); opacity: 0; }
     to { transform: translateY(0) scale(1); opacity: 1; }
+  }
+
+  .part-pop {
+    animation: partPop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes partPop {
+    from { transform: scale(0.5); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
   }
 
   .chimney {
@@ -376,6 +407,10 @@
     opacity: 0.7;
   }
 
+  .part-assisted {
+    opacity: 0.6;
+  }
+
   .buddy {
     position: absolute;
     bottom: 40px;
@@ -391,6 +426,65 @@
     40% { transform: translateY(-22px); }
     100% { transform: translateY(0); }
   }
+
+  .slide-wrap {
+    display: none;
+    width: 100%;
+    max-width: 92vw;
+    height: 152px;
+    position: relative;
+    flex-shrink: 0;
+  }
+  .slide-wrap.active { display: block; }
+
+  .slide-rig {
+    position: absolute;
+    bottom: 40px;
+    left: 0;
+    right: 0;
+    height: 112px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 1.4rem;
+  }
+
+  .climb-track {
+    position: relative;
+    width: 40px;
+    height: 100px;
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 2px;
+  }
+
+  .climb-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--card-line);
+    flex-shrink: 0;
+  }
+  .climb-dot.done { background: var(--accent); }
+
+  .slide-emoji {
+    font-size: 4.2rem;
+    line-height: 1;
+  }
+
+  .buddy2 {
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    transform: translateX(-50%);
+    font-size: 1.5rem;
+    transition: left 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), bottom 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.15));
+  }
+  .buddy2.hop { animation: hop 0.5s ease; }
+  .buddy2.whoosh { transition: left 0.7s ease-in, bottom 0.7s ease-in; }
 
   .celebrate {
     text-align: center;
@@ -532,6 +626,11 @@
     <button class="tab" id="tabNomes" role="tab" aria-selected="false">👪 Nomes da família</button>
   </div>
 
+  <div class="tabs reward-tabs" role="tablist" aria-label="Escolher recompensa">
+    <button class="tab active" id="tabCasa" role="tab" aria-selected="true">🏠 Casinha</button>
+    <button class="tab" id="tabEscorrega" role="tab" aria-selected="false">🛝 Escorregador</button>
+  </div>
+
   <div class="card" id="trialCard">
     <p class="instruction" id="instruction">Toque no som que você ouviu</p>
     <div class="prompt-row">
@@ -552,12 +651,29 @@
     <button class="again-btn" id="againBtn">🔁 Jogar de novo</button>
   </div>
 
-  <span class="village-counter" id="villageCounter">🏙️ 0 casas construídas ao todo</span>
+  <div class="counters-row">
+    <span class="village-counter" id="villageCounter">🏙️ 0 casas construídas ao todo</span>
+    <span class="village-counter" id="slideCounter">🛝 0 escorregadas ao todo</span>
+  </div>
 
-  <div class="skyline-wrap" aria-hidden="true">
+  <div class="skyline-wrap" id="skylineWrap" aria-hidden="true">
     <div class="skyline" id="skyline"></div>
     <div class="ground"></div>
     <div class="buddy" id="buddy" style="left: 8px;">🧍</div>
+  </div>
+
+  <div class="slide-wrap" id="slideWrap" aria-hidden="true">
+    <div class="slide-rig">
+      <div class="climb-track" id="climbTrack">
+        <span class="climb-dot"></span>
+        <span class="climb-dot"></span>
+        <span class="climb-dot"></span>
+        <span class="climb-dot"></span>
+        <span class="buddy2" id="slideBuddy">🧍</span>
+      </div>
+      <span class="slide-emoji" aria-hidden="true">🛝</span>
+    </div>
+    <div class="ground"></div>
   </div>
 </main>
 
@@ -581,12 +697,15 @@
     </p>
     <code id="configPreview"></code>
     <p>
-      A cada acerto (com ou sem ajuda), uma casinha entra na cidade e o total fica salvo
-      neste tablet — o contador cresce dia após dia, sem nunca mostrar tela de "errado".
+      Antes de jogar, escolha a recompensa: <strong>Casinha</strong> constrói uma parte (parede,
+      telhado, porta, chaminé) a cada acerto — 4 acertos formam uma casa completa. <strong>
+      Escorregador</strong> sobe um degrau por acerto, na mesma quantidade, e desce no 4º. Os
+      dois ficam salvos neste tablet e continuam de onde pararam, mesmo em outro dia — sem
+      nunca mostrar tela de "errado".
     </p>
     <div class="row">
       <button class="close" id="closeDialog">Entendi</button>
-      <button class="reset" id="resetVillage">Reiniciar cidade</button>
+      <button class="reset" id="resetVillage">Reiniciar progresso</button>
     </div>
   </div>
 </dialog>
@@ -639,6 +758,14 @@
   const NAMES_KEY = "jg-nomes";
   const APP_NAME_KEY = "jg-nome-app";
   const DEFAULT_APP_NAME = "Cidade da Leitura";
+  const REWARD_KEY = "jg-recompensa";
+  const HOUSE_PROGRESS_KEY = "jg-casa-progresso";
+  const SLIDE_PROGRESS_KEY = "jg-escorrega-progresso";
+  const SLIDE_TOTAL_KEY = "jg-escorregadas-total";
+
+  // A house is built one part at a time — the slide climbs the same number of steps — so
+  // both reward themes share one "how many correct answers until the next payoff" rhythm.
+  const HOUSE_PARTS = ["parede", "telhado", "porta", "chaminé"];
 
   let deck = "fonemas";
   let trials = [];
@@ -647,6 +774,11 @@
   let villageTotal = Number(localStorage.getItem(VILLAGE_KEY) || 0);
   let chimeOn = localStorage.getItem(SOUND_KEY) !== "0";
   let audioCtx = null;
+  let rewardMode = localStorage.getItem(REWARD_KEY) || "casa";
+  let houseProgress = Number(localStorage.getItem(HOUSE_PROGRESS_KEY) || 0);
+  let slideProgress = Number(localStorage.getItem(SLIDE_PROGRESS_KEY) || 0);
+  let slideTotal = Number(localStorage.getItem(SLIDE_TOTAL_KEY) || 0);
+  let currentHouseEl = null;
   // Photos and real names never leave this device — stored only in localStorage, keyed by
   // the stable person "id" from FAMILY_DEFAULTS, never by the (editable) display label.
   let photos = JSON.parse(localStorage.getItem(PHOTOS_KEY) || "{}");
@@ -669,8 +801,15 @@
   const againBtn = document.getElementById("againBtn");
   const instructionEl = document.getElementById("instruction");
   const villageCounterEl = document.getElementById("villageCounter");
+  const slideCounterEl = document.getElementById("slideCounter");
   const tabFonemas = document.getElementById("tabFonemas");
   const tabNomes = document.getElementById("tabNomes");
+  const tabCasa = document.getElementById("tabCasa");
+  const tabEscorrega = document.getElementById("tabEscorrega");
+  const skylineWrapEl = document.getElementById("skylineWrap");
+  const slideWrapEl = document.getElementById("slideWrap");
+  const climbTrackEl = document.getElementById("climbTrack");
+  const slideBuddyEl = document.getElementById("slideBuddy");
   const soundBtn = document.getElementById("soundBtn");
 
   function updateSoundBtn() {
@@ -936,7 +1075,11 @@
     Array.from(choicesEl.children).forEach((b) => (b.style.pointerEvents = "none"));
 
     playChime();
-    addHouse(wasPrompted);
+    if (rewardMode === "escorrega") {
+      addSlideStep(wasPrompted);
+    } else {
+      addHousePart(wasPrompted);
+    }
 
     setTimeout(() => {
       index += 1;
@@ -948,31 +1091,135 @@
     }, 650);
   }
 
-  function addHouse(assisted) {
-    const palette = HOUSE_PALETTES[skylineEl.children.length % HOUSE_PALETTES.length];
-    const house = document.createElement("div");
-    house.className = "house" + (assisted ? " assisted" : "");
-    house.innerHTML =
-      '<div class="chimney" style="background:' + palette.roof + '"></div>' +
-      '<div class="roof" style="border-bottom-color:' + palette.roof + '"></div>' +
-      '<div class="wall" style="background:' + palette.wall + ';border-color:' + palette.trim + '">' +
+  // Builds the shell for the house currently under construction (invisible parts, correctly
+  // spaced) without revealing anything — used both to start a new house and to restore an
+  // in-progress one after a page reload, since currentHouseEl doesn't survive that.
+  function ensureCurrentHouse() {
+    if (currentHouseEl) {
+      return;
+    }
+    const palette = HOUSE_PALETTES[villageTotal % HOUSE_PALETTES.length];
+    currentHouseEl = document.createElement("div");
+    currentHouseEl.className = "house";
+    currentHouseEl.innerHTML =
+      '<div class="chimney" data-part="chaminé" style="background:' + palette.roof + '"></div>' +
+      '<div class="roof" data-part="telhado" style="border-bottom-color:' + palette.roof + '"></div>' +
+      '<div class="wall" data-part="parede" style="background:' + palette.wall + ';border-color:' + palette.trim + '">' +
       '<span class="arch-window" style="background:' + palette.accent + '"></span>' +
-      '<span class="door" style="background:' + palette.accent + '"></span>' +
+      '<span class="door" data-part="porta" style="background:' + palette.accent + '"></span>' +
       "</div>" +
       (palette.porch ? '<div class="porch" style="border-color:' + palette.trim + '"></div>' : "");
-    skylineEl.appendChild(house);
+    currentHouseEl.querySelectorAll("[data-part]").forEach((el) => {
+      el.style.visibility = "hidden";
+    });
+    const porchEl = currentHouseEl.querySelector(".porch");
+    if (porchEl) {
+      porchEl.style.visibility = "hidden";
+    }
+    skylineEl.appendChild(currentHouseEl);
+    for (let i = 0; i < houseProgress; i++) {
+      const el = currentHouseEl.querySelector('[data-part="' + HOUSE_PARTS[i] + '"]');
+      if (el) {
+        el.style.visibility = "visible";
+      }
+    }
     skylineEl.parentElement.scrollLeft = skylineEl.scrollWidth;
+  }
 
-    const houses = skylineEl.children.length;
-    const targetLeft = Math.min(16 + houses * 60, skylineEl.scrollWidth - 26);
-    buddyEl.style.left = targetLeft + "px";
+  function addHousePart(assisted) {
+    ensureCurrentHouse();
+    const partName = HOUSE_PARTS[houseProgress];
+    const partEl = currentHouseEl.querySelector('[data-part="' + partName + '"]');
+    if (partEl) {
+      partEl.style.visibility = "visible";
+      partEl.classList.add("part-pop");
+      if (assisted) {
+        partEl.classList.add("part-assisted");
+      }
+    }
+
+    const houseLeft = Math.min(16 + skylineEl.children.length * 60, skylineEl.scrollWidth - 26);
+    buddyEl.style.left = houseLeft + "px";
     buddyEl.classList.remove("hop");
     void buddyEl.offsetWidth;
     buddyEl.classList.add("hop");
 
-    villageTotal += 1;
-    localStorage.setItem(VILLAGE_KEY, String(villageTotal));
-    updateVillageCounter();
+    houseProgress += 1;
+    if (houseProgress >= HOUSE_PARTS.length) {
+      const porchEl = currentHouseEl.querySelector(".porch");
+      if (porchEl) {
+        porchEl.style.visibility = "visible";
+        porchEl.classList.add("part-pop");
+      }
+      houseProgress = 0;
+      currentHouseEl = null;
+      villageTotal += 1;
+      localStorage.setItem(VILLAGE_KEY, String(villageTotal));
+      updateVillageCounter();
+    }
+    localStorage.setItem(HOUSE_PROGRESS_KEY, String(houseProgress));
+  }
+
+  function updateClimbDots() {
+    const dots = climbTrackEl.querySelectorAll(".climb-dot");
+    dots.forEach((dot, i) => dot.classList.toggle("done", i < slideProgress));
+  }
+
+  function positionSlideBuddy(step) {
+    slideBuddyEl.style.left = "50%";
+    slideBuddyEl.style.bottom = step * 22 + "px";
+  }
+
+  function addSlideStep(assisted) {
+    slideProgress += 1;
+    updateClimbDots();
+
+    if (slideProgress >= HOUSE_PARTS.length) {
+      // Reached the top — whoosh down the slide, then reset for the next climb.
+      slideBuddyEl.classList.add("whoosh");
+      slideBuddyEl.style.left = "calc(50% + 86px)";
+      slideBuddyEl.style.bottom = "0px";
+      setTimeout(() => {
+        slideBuddyEl.classList.remove("whoosh");
+      }, 750);
+      slideProgress = 0;
+      updateClimbDots();
+      slideTotal += 1;
+      localStorage.setItem(SLIDE_TOTAL_KEY, String(slideTotal));
+      updateSlideCounter();
+    } else {
+      positionSlideBuddy(slideProgress);
+      slideBuddyEl.classList.remove("hop");
+      void slideBuddyEl.offsetWidth;
+      slideBuddyEl.classList.add("hop");
+      if (assisted) {
+        slideBuddyEl.style.opacity = "0.7";
+      } else {
+        slideBuddyEl.style.opacity = "1";
+      }
+    }
+    localStorage.setItem(SLIDE_PROGRESS_KEY, String(slideProgress));
+  }
+
+  function updateSlideCounter() {
+    slideCounterEl.textContent = "🛝 " + slideTotal + (slideTotal === 1 ? " escorregada ao todo" : " escorregadas ao todo");
+  }
+
+  function setRewardMode(mode) {
+    rewardMode = mode;
+    localStorage.setItem(REWARD_KEY, mode);
+    tabCasa.classList.toggle("active", mode === "casa");
+    tabCasa.setAttribute("aria-selected", String(mode === "casa"));
+    tabEscorrega.classList.toggle("active", mode === "escorrega");
+    tabEscorrega.setAttribute("aria-selected", String(mode === "escorrega"));
+    skylineWrapEl.style.display = mode === "casa" ? "" : "none";
+    slideWrapEl.classList.toggle("active", mode === "escorrega");
+    if (mode === "casa") {
+      ensureCurrentHouse();
+    } else {
+      updateClimbDots();
+      positionSlideBuddy(slideProgress);
+    }
   }
 
   function showCelebration() {
@@ -1006,6 +1253,8 @@
   againBtn.addEventListener("click", restart);
   tabFonemas.addEventListener("click", () => startDeck("fonemas"));
   tabNomes.addEventListener("click", () => startDeck("nomes"));
+  tabCasa.addEventListener("click", () => setRewardMode("casa"));
+  tabEscorrega.addEventListener("click", () => setRewardMode("escorrega"));
 
   const infoDialog = document.getElementById("infoDialog");
   const appNameInput = document.getElementById("appNameInput");
@@ -1023,8 +1272,18 @@
   document.getElementById("closeDialog").addEventListener("click", () => infoDialog.close());
   document.getElementById("resetVillage").addEventListener("click", () => {
     villageTotal = 0;
+    houseProgress = 0;
+    slideTotal = 0;
+    slideProgress = 0;
+    currentHouseEl = null;
     localStorage.setItem(VILLAGE_KEY, "0");
+    localStorage.setItem(HOUSE_PROGRESS_KEY, "0");
+    localStorage.setItem(SLIDE_TOTAL_KEY, "0");
+    localStorage.setItem(SLIDE_PROGRESS_KEY, "0");
+    skylineEl.innerHTML = "";
     updateVillageCounter();
+    updateSlideCounter();
+    setRewardMode(rewardMode);
     infoDialog.close();
   });
 
@@ -1040,5 +1299,7 @@
   applyAppName();
   updateSoundBtn();
   updateVillageCounter();
+  updateSlideCounter();
+  setRewardMode(rewardMode);
   startDeck("fonemas");
 </script>
