@@ -434,6 +434,7 @@
     height: 152px;
     position: relative;
     flex-shrink: 0;
+    overflow: hidden;
   }
   .slide-wrap.active { display: block; }
 
@@ -464,10 +465,11 @@
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    background: var(--card-line);
+    background: rgba(255, 255, 255, 0.75);
+    border: 2px solid var(--ink-faint);
     flex-shrink: 0;
   }
-  .climb-dot.done { background: var(--accent); }
+  .climb-dot.done { background: var(--accent); border-color: var(--accent); }
 
   .slide-emoji {
     font-size: 4.2rem;
@@ -478,13 +480,16 @@
     position: absolute;
     left: 50%;
     bottom: 0;
-    transform: translateX(-50%);
+    transform: translateX(-50%) rotate(0deg);
     font-size: 1.5rem;
-    transition: left 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), bottom 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: left 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+      bottom 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.4s ease;
     filter: drop-shadow(0 2px 2px rgba(0,0,0,0.15));
   }
   .buddy2.hop { animation: hop 0.5s ease; }
-  .buddy2.whoosh { transition: left 0.7s ease-in, bottom 0.7s ease-in; }
+  .buddy2.whoosh {
+    transition: left 0.7s ease-in, bottom 0.7s ease-in, transform 0.7s ease-in;
+  }
 
   .celebrate {
     text-align: center;
@@ -1165,40 +1170,55 @@
     dots.forEach((dot, i) => dot.classList.toggle("done", i < slideProgress));
   }
 
+  let slideAnimating = false;
+
   function positionSlideBuddy(step) {
     slideBuddyEl.style.left = "50%";
     slideBuddyEl.style.bottom = step * 22 + "px";
+    slideBuddyEl.style.transform = "translateX(-50%) rotate(0deg)";
+  }
+
+  function bounceSlideBuddy() {
+    slideBuddyEl.classList.remove("hop");
+    void slideBuddyEl.offsetWidth;
+    slideBuddyEl.classList.add("hop");
   }
 
   function addSlideStep(assisted) {
+    if (slideAnimating) {
+      return;
+    }
     slideProgress += 1;
     updateClimbDots();
+    positionSlideBuddy(slideProgress);
+    bounceSlideBuddy();
+    slideBuddyEl.style.opacity = assisted ? "0.7" : "1";
 
     if (slideProgress >= HOUSE_PARTS.length) {
-      // Reached the top — whoosh down the slide, then reset for the next climb.
-      slideBuddyEl.classList.add("whoosh");
-      slideBuddyEl.style.left = "calc(50% + 86px)";
-      slideBuddyEl.style.bottom = "0px";
+      // First finish the climb to the top rung — same motion as every other step — so
+      // arriving and sliding read as two separate beats instead of one blurred jump.
+      slideAnimating = true;
+      localStorage.setItem(SLIDE_PROGRESS_KEY, "0");
       setTimeout(() => {
-        slideBuddyEl.classList.remove("whoosh");
-      }, 750);
-      slideProgress = 0;
-      updateClimbDots();
+        slideBuddyEl.classList.add("whoosh");
+        slideBuddyEl.style.left = "calc(50% + 78px)";
+        slideBuddyEl.style.bottom = "0px";
+        slideBuddyEl.style.transform = "translateX(-50%) rotate(35deg)";
+        setTimeout(() => {
+          slideBuddyEl.classList.remove("whoosh");
+          slideProgress = 0;
+          updateClimbDots();
+          positionSlideBuddy(0);
+          slideBuddyEl.style.opacity = "1";
+          slideAnimating = false;
+        }, 720);
+      }, 480);
       slideTotal += 1;
       localStorage.setItem(SLIDE_TOTAL_KEY, String(slideTotal));
       updateSlideCounter();
     } else {
-      positionSlideBuddy(slideProgress);
-      slideBuddyEl.classList.remove("hop");
-      void slideBuddyEl.offsetWidth;
-      slideBuddyEl.classList.add("hop");
-      if (assisted) {
-        slideBuddyEl.style.opacity = "0.7";
-      } else {
-        slideBuddyEl.style.opacity = "1";
-      }
+      localStorage.setItem(SLIDE_PROGRESS_KEY, String(slideProgress));
     }
-    localStorage.setItem(SLIDE_PROGRESS_KEY, String(slideProgress));
   }
 
   function updateSlideCounter() {
