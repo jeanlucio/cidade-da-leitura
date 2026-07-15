@@ -1701,7 +1701,7 @@
     // Speak syllable on simple tap (no significant drag movement)
     tile.addEventListener("click", () => {
       if (!silabaWasDragged && !tile.classList.contains("placed")) {
-        speak(tile.dataset.syl);
+        speak(tile.dataset.syl.toLowerCase());
       }
     });
 
@@ -1754,7 +1754,7 @@
       silabaActiveTile = null;
       removeGhost();
       tile.classList.remove("dragging");
-      if (!tile.classList.contains("placed")) speak(tile.dataset.syl);
+      if (!tile.classList.contains("placed")) speak(tile.dataset.syl.toLowerCase());
       return;
     }
     attemptDrop(touch.clientX, touch.clientY);
