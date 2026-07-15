@@ -770,17 +770,8 @@
   .silaba-word-complete.show { display: flex; }
   .silaba-word-complete p { font-size: 0.95rem; color: var(--ink-soft); margin: 0; }
 
-  .silaba-next-btn {
-    border: none;
-    background: var(--accent);
-    color: var(--accent-ink);
-    font-size: 1rem;
-    font-weight: 700;
-    padding: 0.75rem 1.6rem;
-    border-radius: 999px;
-    cursor: pointer;
-  }
-  .silaba-next-btn:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+  /* next button hidden — auto-advance used instead */
+  .silaba-next-btn { display: none; }
 
   .silaba-celebrate-emoji {
     font-size: 2.2rem;
@@ -1032,6 +1023,9 @@
   let silabaGhost = null;    // the floating clone element
   let silabaActiveTile = null; // tile being dragged
   let silabaActiveTileIndex = null;
+  let silabaWasDragged = false; // distinguishes tap from drag
+  let silabaDragStartX = 0;
+  let silabaDragStartY = 0;
   let promptTimer = null;
   let villageTotal = Number(localStorage.getItem(VILLAGE_KEY) || 0);
   let chimeOn = localStorage.getItem(SOUND_KEY) !== "0";
@@ -1677,6 +1671,8 @@
           } else {
             addHousePart(false);
           }
+          // Auto-advance to next word after showing the feedback for 2s
+          setTimeout(nextSilabaWord, 2000);
         }
         return;
       }
@@ -1694,9 +1690,19 @@
     tile.addEventListener("mousedown", (e) => {
       if (tile.classList.contains("placed")) return;
       e.preventDefault();
+      silabaWasDragged = false;
+      silabaDragStartX = e.clientX;
+      silabaDragStartY = e.clientY;
       silabaActiveTile = tile;
       tile.classList.add("dragging");
       silabaGhost = createGhost(tile, e.clientX, e.clientY);
+    });
+
+    // Speak syllable on simple tap (no significant drag movement)
+    tile.addEventListener("click", () => {
+      if (!silabaWasDragged && !tile.classList.contains("placed")) {
+        speak(tile.dataset.syl);
+      }
     });
 
     // ── Touch events ──────────────────────────────────────────
@@ -1704,6 +1710,9 @@
       if (tile.classList.contains("placed")) return;
       e.preventDefault();
       const touch = e.touches[0];
+      silabaWasDragged = false;
+      silabaDragStartX = touch.clientX;
+      silabaDragStartY = touch.clientY;
       silabaActiveTile = tile;
       tile.classList.add("dragging");
       silabaGhost = createGhost(tile, touch.clientX, touch.clientY);
@@ -1713,6 +1722,9 @@
   // Global pointer/touch move & up handlers (attached once)
   document.addEventListener("mousemove", (e) => {
     if (!silabaActiveTile) return;
+    const dx = e.clientX - silabaDragStartX;
+    const dy = e.clientY - silabaDragStartY;
+    if (Math.hypot(dx, dy) > 8) silabaWasDragged = true;
     moveGhost(e.clientX, e.clientY);
     setHoveredSlot(slotAtPoint(e.clientX, e.clientY));
   });
@@ -1726,6 +1738,9 @@
     if (!silabaActiveTile) return;
     e.preventDefault();
     const touch = e.touches[0];
+    const dx = touch.clientX - silabaDragStartX;
+    const dy = touch.clientY - silabaDragStartY;
+    if (Math.hypot(dx, dy) > 8) silabaWasDragged = true;
     moveGhost(touch.clientX, touch.clientY);
     setHoveredSlot(slotAtPoint(touch.clientX, touch.clientY));
   }, { passive: false });
@@ -1733,6 +1748,15 @@
   document.addEventListener("touchend", (e) => {
     if (!silabaActiveTile) return;
     const touch = e.changedTouches[0];
+    // If barely moved, it's a tap → speak (touchend fires before click on mobile)
+    if (!silabaWasDragged) {
+      const tile = silabaActiveTile;
+      silabaActiveTile = null;
+      removeGhost();
+      tile.classList.remove("dragging");
+      if (!tile.classList.contains("placed")) speak(tile.dataset.syl);
+      return;
+    }
     attemptDrop(touch.clientX, touch.clientY);
   });
 
