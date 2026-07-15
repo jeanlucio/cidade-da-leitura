@@ -612,6 +612,220 @@
   @media (prefers-reduced-motion: reduce) {
     .house, .buddy.hop, .choice.prompted { animation: none; }
   }
+
+  /* ── Silaba card ─────────────────────────────────────────── */
+
+  .silaba-card {
+    background: var(--card);
+    border: 1px solid var(--card-line);
+    border-radius: 28px;
+    box-shadow: 0 10px 30px -14px rgba(45, 59, 52, 0.25);
+    padding: 1.6rem 2rem 2rem;
+    width: min(92vw, 480px);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.1rem;
+  }
+  .silaba-card.active { display: flex; }
+
+  .silaba-img-wrap {
+    width: 140px;
+    height: 140px;
+    border-radius: 22px;
+    overflow: hidden;
+    background: var(--accent-soft);
+    border: 2px solid var(--card-line);
+    flex-shrink: 0;
+  }
+  .silaba-img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .silaba-word-label {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--ink);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin: 0;
+    text-align: center;
+    opacity: 0.35;
+  }
+
+  .silaba-bank {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    justify-content: center;
+    min-height: 56px;
+    width: 100%;
+  }
+
+  .silaba-tile {
+    padding: 0.55rem 1.1rem;
+    border-radius: 14px;
+    background: var(--accent-2);
+    color: #fff;
+    font-size: 1.45rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    cursor: grab;
+    user-select: none;
+    touch-action: none;
+    border: 3px solid transparent;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+    box-shadow: 0 4px 12px -4px rgba(74, 151, 168, 0.45);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .silaba-tile:active { cursor: grabbing; }
+  .silaba-tile.dragging {
+    opacity: 0.35;
+    transform: scale(0.95);
+  }
+  .silaba-tile.placed {
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  /* Clone that follows the pointer */
+  .silaba-ghost {
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    padding: 0.55rem 1.1rem;
+    border-radius: 14px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 1.45rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    box-shadow: 0 8px 24px -6px rgba(47, 125, 110, 0.55);
+    transform: scale(1.12) rotate(-3deg);
+    opacity: 0.92;
+    transition: none;
+  }
+
+  .silaba-slots {
+    display: flex;
+    gap: 0.6rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .silaba-slot {
+    min-width: 68px;
+    height: 56px;
+    border-radius: 14px;
+    border: 3px dashed var(--card-line);
+    background: #f8f9f7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.45rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    color: var(--ink);
+    transition: border-color 0.2s ease, background 0.2s ease, transform 0.15s ease;
+    padding: 0 0.9rem;
+  }
+  .silaba-slot.over {
+    border-color: var(--accent-2);
+    background: color-mix(in srgb, var(--accent-2) 12%, #f8f9f7);
+    transform: scale(1.06);
+  }
+  .silaba-slot.correct {
+    border-style: solid;
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 14%, #f8f9f7);
+    animation: silabaCorrectPop 0.38s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes silabaCorrectPop {
+    from { transform: scale(0.82); }
+    to   { transform: scale(1); }
+  }
+
+  .silaba-bounce-back {
+    animation: silabaBounceBack 0.35s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+  }
+
+  @keyframes silabaBounceBack {
+    0%   { transform: scale(1.05); }
+    40%  { transform: scale(0.9); }
+    70%  { transform: scale(1.03); }
+    100% { transform: scale(1); }
+  }
+
+  .silaba-word-complete {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.7rem;
+    text-align: center;
+  }
+  .silaba-word-complete.show { display: flex; }
+  .silaba-word-complete p { font-size: 0.95rem; color: var(--ink-soft); margin: 0; }
+
+  .silaba-next-btn {
+    border: none;
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-size: 1rem;
+    font-weight: 700;
+    padding: 0.75rem 1.6rem;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+  .silaba-next-btn:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+
+  .silaba-celebrate-emoji {
+    font-size: 2.2rem;
+    animation: silabaStars 0.6s ease;
+  }
+  @keyframes silabaStars {
+    0%   { transform: scale(0) rotate(-20deg); opacity: 0; }
+    60%  { transform: scale(1.25) rotate(6deg); }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  }
+
+  .silaba-hear-btn {
+    width: 2.6rem;
+    height: 2.6rem;
+    border-radius: 50%;
+    border: none;
+    background: var(--accent-2);
+    color: #fff;
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    align-self: center;
+  }
+  .silaba-hear-btn:active { transform: scale(0.92); }
+
+  .silaba-top-row {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+
+  .silaba-progress {
+    display: flex;
+    gap: 0.4rem;
+  }
+  .silaba-progress .dot {
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 50%;
+    background: var(--card-line);
+  }
+  .silaba-progress .dot.done { background: var(--accent); }
 </style>
 
 <div class="topbar">
@@ -629,6 +843,7 @@
   <div class="tabs" role="tablist" aria-label="Escolher atividade">
     <button class="tab active" id="tabFonemas" role="tab" aria-selected="true">🔤 Sons das letras</button>
     <button class="tab" id="tabNomes" role="tab" aria-selected="false">👪 Nomes da família</button>
+    <button class="tab" id="tabSilabas" role="tab" aria-selected="false">🧩 Sílabas</button>
   </div>
 
   <div class="tabs reward-tabs" role="tablist" aria-label="Escolher recompensa">
@@ -648,6 +863,26 @@
     </div>
     <div class="choices" id="choices"></div>
     <div class="progress" id="progress"></div>
+  </div>
+
+  <!-- Silaba drag & drop card -->
+  <div class="silaba-card" id="silabaCard" aria-label="Atividade de sílabas">
+    <p class="instruction" id="silabaInstruction">Arraste as sílabas na ordem certa</p>
+    <div class="silaba-top-row">
+      <div class="silaba-img-wrap">
+        <img id="silabaImg" src="" alt="" draggable="false">
+      </div>
+      <button class="silaba-hear-btn" id="silabaHearBtn" aria-label="Ouvir a palavra">🔊</button>
+    </div>
+    <p class="silaba-word-label" id="silabaWordLabel"></p>
+    <div class="silaba-bank" id="silabaBank"></div>
+    <div class="silaba-slots" id="silabaSlots"></div>
+    <div class="silaba-word-complete" id="silabaWordComplete">
+      <span class="silaba-celebrate-emoji">⭐</span>
+      <p id="silabaCompleteMsg">Muito bem!</p>
+      <button class="silaba-next-btn" id="silabaNextBtn">Próxima palavra ▶</button>
+    </div>
+    <div class="silaba-progress" id="silabaProgress"></div>
   </div>
 
   <div class="card celebrate" id="celebrateCard">
@@ -716,6 +951,20 @@
 </dialog>
 
 <script>
+  // ── Silaba word list ─────────────────────────────────────────────────────
+  // Each entry: { word, say, image, syllables }
+  // "syllables" are in the CORRECT order — they will be shuffled for display.
+  const SILABA_WORDS = [
+    { word: "CAVALO",  say: "Cavalo",  image: "images/cavalo.png", syllables: ["CA", "VA", "LO"] },
+    { word: "PATO",    say: "Pato",    image: "images/pato.png",   syllables: ["PA", "TO"] },
+    { word: "CASA",    say: "Casa",    image: "images/casa.png",   syllables: ["CA", "SA"] },
+    { word: "BANANA",  say: "Banana",  image: "images/banana.png", syllables: ["BA", "NA", "NA"] },
+    { word: "MESA",    say: "Mesa",    image: "images/mesa.png",   syllables: ["ME", "SA"] },
+    { word: "GATO",    say: "Gato",    image: "images/gato.png",   syllables: ["GA", "TO"] },
+    { word: "BOLA",    say: "Bola",    image: "images/bola.png",   syllables: ["BO", "LA"] },
+    { word: "PORTA",   say: "Porta",   image: "images/porta.png",  syllables: ["POR", "TA"] },
+  ];
+
   // EDIT HERE: replace with the real phoneme/letter sequence from the SLP/psicopedagoga.
   // Vowel prompts use an accented "say" (Á, Ó...) so the TTS engine gives them the same
   // stressed, full-volume articulation as consonant+vowel syllables like "Mê"/"Tê" — a bare
@@ -775,6 +1024,14 @@
   let deck = "fonemas";
   let trials = [];
   let index = 0;
+
+  // Silaba state
+  let silabaWordList = [];
+  let silabaWordIndex = 0;
+  let silabaSlotData = [];   // array of { correctSyl, placedSyl|null }
+  let silabaGhost = null;    // the floating clone element
+  let silabaActiveTile = null; // tile being dragged
+  let silabaActiveTileIndex = null;
   let promptTimer = null;
   let villageTotal = Number(localStorage.getItem(VILLAGE_KEY) || 0);
   let chimeOn = localStorage.getItem(SOUND_KEY) !== "0";
@@ -809,6 +1066,18 @@
   const slideCounterEl = document.getElementById("slideCounter");
   const tabFonemas = document.getElementById("tabFonemas");
   const tabNomes = document.getElementById("tabNomes");
+  const tabSilabas = document.getElementById("tabSilabas");
+  const silabaCard = document.getElementById("silabaCard");
+  const silabaImg = document.getElementById("silabaImg");
+  const silabaBank = document.getElementById("silabaBank");
+  const silabaSlots = document.getElementById("silabaSlots");
+  const silabaWordLabel = document.getElementById("silabaWordLabel");
+  const silabaWordComplete = document.getElementById("silabaWordComplete");
+  const silabaCompleteMsg = document.getElementById("silabaCompleteMsg");
+  const silabaNextBtn = document.getElementById("silabaNextBtn");
+  const silabaHearBtn = document.getElementById("silabaHearBtn");
+  const silabaProgressEl = document.getElementById("silabaProgress");
+  const silabaInstruction = document.getElementById("silabaInstruction");
   const tabCasa = document.getElementById("tabCasa");
   const tabEscorrega = document.getElementById("tabEscorrega");
   const skylineWrapEl = document.getElementById("skylineWrap");
@@ -1251,17 +1520,267 @@
     instructionEl.textContent = "";
   }
 
+  // ── Silaba drag & drop ───────────────────────────────────────────────────
+
+  function silabaShuffled(arr) {
+    // Create shuffled indices, but for repeated syllables (like BANANA: BA,NA,NA)
+    // we need to track by index, not value.
+    const indexed = arr.map((v, i) => ({ v, i, r: Math.random() }));
+    indexed.sort((a, b) => a.r - b.r);
+    return indexed.map(x => x.i); // returns shuffled original indices
+  }
+
+  function renderSilabaProgress() {
+    silabaProgressEl.innerHTML = "";
+    silabaWordList.forEach((_, i) => {
+      const dot = document.createElement("span");
+      dot.className = "dot" + (i < silabaWordIndex ? " done" : "");
+      silabaProgressEl.appendChild(dot);
+    });
+  }
+
+  function renderSilaba() {
+    const entry = silabaWordList[silabaWordIndex];
+    silabaImg.src = entry.image;
+    silabaImg.alt = entry.say;
+    silabaWordLabel.textContent = entry.word;
+    silabaWordComplete.classList.remove("show");
+    silabaInstruction.textContent = "Arraste as sílabas na ordem certa";
+
+    // Build slot data
+    silabaSlotData = entry.syllables.map(syl => ({ correctSyl: syl, placedSyl: null }));
+
+    // Shuffled display order of tiles (by original index)
+    const shuffledIndices = silabaShuffled(entry.syllables);
+
+    // Build bank tiles
+    silabaBank.innerHTML = "";
+    shuffledIndices.forEach(origIdx => {
+      const tile = document.createElement("div");
+      tile.className = "silaba-tile";
+      tile.textContent = entry.syllables[origIdx];
+      tile.dataset.origIdx = String(origIdx);
+      tile.dataset.syl = entry.syllables[origIdx];
+      attachTileDrag(tile);
+      silabaBank.appendChild(tile);
+    });
+
+    // Build slots
+    silabaSlots.innerHTML = "";
+    entry.syllables.forEach((_, slotIdx) => {
+      const slot = document.createElement("div");
+      slot.className = "silaba-slot";
+      slot.dataset.slotIdx = String(slotIdx);
+      silabaSlots.appendChild(slot);
+    });
+
+    renderSilabaProgress();
+    speak(entry.say);
+  }
+
+  // Creates & positions the ghost clone that follows the pointer.
+  function createGhost(tile, x, y) {
+    const ghost = document.createElement("div");
+    ghost.className = "silaba-ghost";
+    ghost.textContent = tile.textContent;
+    const rect = tile.getBoundingClientRect();
+    ghost.style.width = rect.width + "px";
+    ghost.style.left = (x - rect.width / 2) + "px";
+    ghost.style.top  = (y - rect.height / 2) + "px";
+    document.body.appendChild(ghost);
+    return ghost;
+  }
+
+  function moveGhost(x, y) {
+    if (!silabaGhost) return;
+    const w = silabaGhost.offsetWidth;
+    const h = silabaGhost.offsetHeight;
+    silabaGhost.style.left = (x - w / 2) + "px";
+    silabaGhost.style.top  = (y - h / 2) + "px";
+  }
+
+  function removeGhost() {
+    if (silabaGhost) { silabaGhost.remove(); silabaGhost = null; }
+  }
+
+  // Returns the slot element under (x, y), or null.
+  function slotAtPoint(x, y) {
+    // Temporarily hide ghost so elementFromPoint works
+    if (silabaGhost) silabaGhost.style.display = "none";
+    const el = document.elementFromPoint(x, y);
+    if (silabaGhost) silabaGhost.style.display = "";
+    if (!el) return null;
+    return el.closest(".silaba-slot");
+  }
+
+  let hoveredSlot = null;
+
+  function setHoveredSlot(slot) {
+    if (hoveredSlot && hoveredSlot !== slot) {
+      hoveredSlot.classList.remove("over");
+    }
+    hoveredSlot = slot;
+    if (slot && !slot.classList.contains("correct")) {
+      slot.classList.add("over");
+    }
+  }
+
+  function attemptDrop(x, y) {
+    const slot = slotAtPoint(x, y);
+    if (silabaActiveTile) {
+      silabaActiveTile.classList.remove("dragging");
+    }
+    removeGhost();
+    if (hoveredSlot) { hoveredSlot.classList.remove("over"); hoveredSlot = null; }
+
+    const tile = silabaActiveTile;
+    const origIdx = silabaActiveTile ? Number(silabaActiveTile.dataset.origIdx) : null;
+    silabaActiveTile = null;
+
+    if (!slot || slot.classList.contains("correct")) {
+      // Didn't land on a valid empty slot — bounce the tile back silently
+      if (tile) {
+        tile.classList.add("silaba-bounce-back");
+        tile.addEventListener("animationend", () => tile.classList.remove("silaba-bounce-back"), { once: true });
+      }
+      return;
+    }
+
+    const slotIdx = Number(slot.dataset.slotIdx);
+    const correctSyl = silabaSlotData[slotIdx].correctSyl;
+    const droppedSyl = tile ? tile.dataset.syl : null;
+
+    if (droppedSyl === correctSyl && silabaSlotData[slotIdx].placedSyl === null) {
+      // ✅ Correct! Check if this origIdx is already used in another correct slot
+      const alreadyUsed = silabaSlotData.some((s, i) => i !== slotIdx && s.placedOrigIdx === origIdx);
+      if (!alreadyUsed) {
+        // Lock slot
+        silabaSlotData[slotIdx].placedSyl = droppedSyl;
+        silabaSlotData[slotIdx].placedOrigIdx = origIdx;
+        slot.textContent = droppedSyl;
+        slot.classList.add("correct");
+        // Hide the tile in the bank
+        if (tile) tile.classList.add("placed");
+        playChime();
+        // Check if all slots filled
+        const allDone = silabaSlotData.every(s => s.placedSyl !== null);
+        if (allDone) {
+          silabaWordComplete.classList.add("show");
+          silabaInstruction.textContent = "";
+          silabaCompleteMsg.textContent = "Incrível! Você montou a palavra! 🎉";
+          playChime();
+          setTimeout(playChime, 220);
+          setTimeout(playChime, 440);
+          // Reward
+          if (rewardMode === "escorrega") {
+            addSlideStep(false);
+          } else {
+            addHousePart(false);
+          }
+        }
+        return;
+      }
+    }
+
+    // ❌ Wrong slot or already used index — errorless: silently bounce back
+    if (tile) {
+      tile.classList.add("silaba-bounce-back");
+      tile.addEventListener("animationend", () => tile.classList.remove("silaba-bounce-back"), { once: true });
+    }
+  }
+
+  function attachTileDrag(tile) {
+    // ── Mouse events ──────────────────────────────────────────
+    tile.addEventListener("mousedown", (e) => {
+      if (tile.classList.contains("placed")) return;
+      e.preventDefault();
+      silabaActiveTile = tile;
+      tile.classList.add("dragging");
+      silabaGhost = createGhost(tile, e.clientX, e.clientY);
+    });
+
+    // ── Touch events ──────────────────────────────────────────
+    tile.addEventListener("touchstart", (e) => {
+      if (tile.classList.contains("placed")) return;
+      e.preventDefault();
+      const touch = e.touches[0];
+      silabaActiveTile = tile;
+      tile.classList.add("dragging");
+      silabaGhost = createGhost(tile, touch.clientX, touch.clientY);
+    }, { passive: false });
+  }
+
+  // Global pointer/touch move & up handlers (attached once)
+  document.addEventListener("mousemove", (e) => {
+    if (!silabaActiveTile) return;
+    moveGhost(e.clientX, e.clientY);
+    setHoveredSlot(slotAtPoint(e.clientX, e.clientY));
+  });
+
+  document.addEventListener("mouseup", (e) => {
+    if (!silabaActiveTile) return;
+    attemptDrop(e.clientX, e.clientY);
+  });
+
+  document.addEventListener("touchmove", (e) => {
+    if (!silabaActiveTile) return;
+    e.preventDefault();
+    const touch = e.touches[0];
+    moveGhost(touch.clientX, touch.clientY);
+    setHoveredSlot(slotAtPoint(touch.clientX, touch.clientY));
+  }, { passive: false });
+
+  document.addEventListener("touchend", (e) => {
+    if (!silabaActiveTile) return;
+    const touch = e.changedTouches[0];
+    attemptDrop(touch.clientX, touch.clientY);
+  });
+
+  function startSilabaDeck() {
+    deck = "silabas";
+    silabaWordList = shuffled([...SILABA_WORDS]);
+    silabaWordIndex = 0;
+    trialCard.style.display = "none";
+    celebrateCard.classList.remove("show");
+    silabaCard.classList.add("active");
+    tabFonemas.classList.remove("active");
+    tabFonemas.setAttribute("aria-selected", "false");
+    tabNomes.classList.remove("active");
+    tabNomes.setAttribute("aria-selected", "false");
+    tabSilabas.classList.add("active");
+    tabSilabas.setAttribute("aria-selected", "true");
+    renderSilaba();
+  }
+
+  function nextSilabaWord() {
+    silabaWordIndex += 1;
+    if (silabaWordIndex >= silabaWordList.length) {
+      // All words done — show celebration
+      silabaCard.classList.remove("active");
+      trialCard.style.display = "none";
+      celebrateCard.classList.add("show");
+      celebrateText.textContent = "Você montou todas as palavras! A cidade cresceu! 🏙️";
+    } else {
+      renderSilaba();
+    }
+  }
+
+  // ── Existing deck launcher ───────────────────────────────────────────────
+
   function startDeck(which) {
     deck = which;
     trials = which === "fonemas" ? FONEMA_TRIALS : buildNomeTrials();
     index = 0;
     trialCard.style.display = "flex";
     celebrateCard.classList.remove("show");
+    silabaCard.classList.remove("active");
     instructionEl.textContent = which === "fonemas" ? "Toque no som que você ouviu" : "Toque no nome que você ouviu";
     tabFonemas.classList.toggle("active", which === "fonemas");
     tabFonemas.setAttribute("aria-selected", String(which === "fonemas"));
     tabNomes.classList.toggle("active", which === "nomes");
     tabNomes.setAttribute("aria-selected", String(which === "nomes"));
+    tabSilabas.classList.remove("active");
+    tabSilabas.setAttribute("aria-selected", "false");
     renderTrial();
   }
 
@@ -1273,6 +1792,11 @@
   againBtn.addEventListener("click", restart);
   tabFonemas.addEventListener("click", () => startDeck("fonemas"));
   tabNomes.addEventListener("click", () => startDeck("nomes"));
+  tabSilabas.addEventListener("click", startSilabaDeck);
+  silabaNextBtn.addEventListener("click", nextSilabaWord);
+  silabaHearBtn.addEventListener("click", () => {
+    if (silabaWordList[silabaWordIndex]) speak(silabaWordList[silabaWordIndex].say);
+  });
   tabCasa.addEventListener("click", () => setRewardMode("casa"));
   tabEscorrega.addEventListener("click", () => setRewardMode("escorrega"));
 
